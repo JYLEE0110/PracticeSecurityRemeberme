@@ -22,7 +22,7 @@ public class MemberController {
 
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/mypage")
     public void mypage() {
 

@@ -12,6 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.zerock.b52.security.CustomOAuth2UserService;
+import org.zerock.b52.security.handler.CustomAccessDeniedHandler;
+import org.zerock.b52.security.handler.CustomOAuthSuccessHandler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,6 +27,7 @@ import lombok.extern.log4j.Log4j2;
 public class CustomSecurityConfig {
 
     private final DataSource dataSource;
+    // private final CustomOAuth2UserService customOAuth2UserService;
 
     // TokenRepository에 토큰 값 저장 함수
     @Bean
@@ -44,11 +48,19 @@ public class CustomSecurityConfig {
 
         log.info("filter chain----------------------------");
 
-        // 로그인 페이지 경로 지정
+        // 스프링 기본 로그인 설정화면
+        // http.formLogin(Customizer.withDefaults());
+
+        // 커스텀 로그인 페이지 경로 지정
         http.formLogin(config -> {
 
             config.loginPage("/member/signin");
 
+        });
+
+        // 권한이 없는 페이지를 접속했을 시 처리
+        http.exceptionHandling(config -> {
+            config.accessDeniedHandler(new CustomAccessDeniedHandler());
         });
 
         http.rememberMe(config -> {
@@ -61,6 +73,14 @@ public class CustomSecurityConfig {
         http.csrf(config -> {
 
             config.disable();
+
+        });
+
+        // social 로그인 signin페이지에 설정 (카카오)
+        http.oauth2Login(config -> {
+
+            config.loginPage("/member/signin");
+            config.successHandler(new CustomOAuthSuccessHandler());
 
         });
 
